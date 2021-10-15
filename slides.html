@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title>reveal-md</title>
+    <link rel="shortcut icon" href="./favicon.ico"/>
+    <link rel="stylesheet" href="./dist/reveal.css" />
+    <link rel="stylesheet" href="./dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="./css/highlight/zenburn.css" />
+
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"># Vim for the Frontend
+
+- [twitter.com/mhartington](http://twitter.com/mhartington)
+- [twitch.tv/mhartington](https://www.twitch.tv/mhartington)</script></section><section  data-markdown><script type="text/template">
+## `whoami`
+
+- Vim: 10 years, nvim: 7 years
+- Front end + mobile
+- HTML, CSS, JS, Swift, Kotlin
+</script></section><section  data-markdown><script type="text/template">
+## Journey
+
+- Dreamweaver (Designer days)
+- Brackets/Atom
+- WebStorm
+- Atom (again)
+- n/vim
+</script></section><section  data-markdown><script type="text/template">
+<!-- .slide: data-auto-animate -->
+
+## Why vim
+</script></section><section  data-markdown><script type="text/template">
+<!-- .slide: data-auto-animate -->
+
+## Why vim
+
+## For Frontend?
+</script></section><section  data-markdown><script type="text/template">
+- Speed
+- Navigation
+- Deep code integration
+</script></section><section  data-markdown><script type="text/template">
+> All promised by "modern" editors
+</script></section><section  data-markdown><script type="text/template">
+## Why vim
+</script></section><section  data-markdown><script type="text/template">
+## Why nvim
+</script></section><section  data-markdown><script type="text/template">
+## Obvious stuff
+- LSP
+- Treesitter
+</script></section><section  data-markdown><script type="text/template">
+```lua
+local servers = {'tsserver', 'html', 'cssls',}
+for _, lsp in ipairs(servers) do
+  lspconfig[lsp].setup()
+end
+```
+</script></section><section  data-markdown><script type="text/template">
+```lua
+lspconfig.jsonls.setup {
+  settings = {
+    json = {
+      -- Schemas https://www.schemastore.org
+      schemas = {
+        {
+          fileMatch = {"package.json"},
+          url = "https://json.schemastore.org/package.json"
+        },
+        {
+          fileMatch = {"tsconfig*.json"},
+          url = "https://json.schemastore.org/tsconfig.json"
+        },
+        {
+          fileMatch = {
+            ".prettierrc",
+            ".prettierrc.json",
+            "prettier.config.json"
+          },
+          url = "https://json.schemastore.org/prettierrc.json"
+        },
+        {
+          fileMatch = {".eslintrc", ".eslintrc.json"},
+          url = "https://json.schemastore.org/eslintrc.json"
+        },
+        {
+          fileMatch = {".babelrc", ".babelrc.json", "babel.config.json"},
+          url = "https://json.schemastore.org/babelrc.json"
+        },
+        {
+          fileMatch = {"lerna.json"},
+          url = "https://json.schemastore.org/lerna.json"
+        },
+        {
+          fileMatch = {"now.json", "vercel.json"},
+          url = "https://json.schemastore.org/now.json"
+        },
+        {
+          fileMatch = {
+            ".stylelintrc",
+            ".stylelintrc.json",
+            "stylelint.config.json"
+          },
+          url = "http://json.schemastore.org/stylelintrc.json"
+        }
+      }
+    }
+  }
+}
+
+```
+</script></section><section  data-markdown><script type="text/template">
+## Speed
+
+### Gotta go fast
+
+<img width="400" src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/77ee2c66-febd-4bd4-bc2e-5f0d110fef5f/daqtoed-0a334159-ee66-4fd9-bbfb-bae599cf89ea.gif?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwic3ViIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsImF1ZCI6WyJ1cm46c2VydmljZTpmaWxlLmRvd25sb2FkIl0sIm9iaiI6W1t7InBhdGgiOiIvZi83N2VlMmM2Ni1mZWJkLTRiZDQtYmMyZS01ZjBkMTEwZmVmNWYvZGFxdG9lZC0wYTMzNDE1OS1lZTY2LTRmZDktYmJmYi1iYWU1OTljZjg5ZWEuZ2lmIn1dXX0.1IlT6YDwNgeeid7ylyL185AIAXXNtMWv-llB3dcbVMU">
+</script></section><section  data-markdown><script type="text/template">
+- Time to start up?
+- Editor performance?
+- Language parsing?
+</script></section><section  data-markdown><script type="text/template">
+All great, but over my head...
+</script></section><section  data-markdown><script type="text/template">
+✅ Time to actually ship something
+</script></section><section  data-markdown><script type="text/template">
+### [mattn/emmet-vim](http://github.com/mattn/emmet-vim)
+
+```lua
+packer.startup(
+  function(use)
+    use { "mattn/emmet-vim" }
+  end
+)
+```
+</script></section><section  data-markdown><script type="text/template">
+### Better mapping
+```vim
+function! s:expand_html_tab()
+
+" try to determine if we're within quotes or tags.
+" if so, assume we're in an emmet fill area.
+ let line = getline('.')
+ if col('.') < len(line)
+   let line = matchstr(line, '[">][^<"]*\%'.col('.').'c[^>"]*[<"]')
+   if len(line) >= 2
+      return "\<C-n>"
+   endif
+ endif
+
+" expand anything emmet thinks is expandable.
+if emmet#isExpandable()
+  return emmet#expandAbbrIntelligent("\<tab>")
+endif
+
+" return a regular tab character
+return "\<tab>"
+
+endfunction
+```
+</script></section><section  data-markdown><script type="text/template">
+
+### LSP and Emmet?
+### [pedro757/emmet](https://github.com/pedro757/emmet)
+
+```lua
+--- npm install -g ls_emmet
+local lspconfig = require'lspconfig'
+local configs = require'lspconfig/configs'
+
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities.textDocument.completion.completionItem.snippetSupport = true
+
+configs.ls_emmet = {
+  default_config = {
+    cmd = { 'ls_emmet', '--stdio' };
+    filetypes = { 'html', 'css', 'scss', 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'haml',
+      'xml', 'xsl', 'pug', 'slim', 'sass', 'stylus', 'less', 'sss'};
+    root_dir = function(fname)
+      return vim.loop.cwd()
+    end;
+    settings = {};
+  };
+}
+
+lspconfig.ls_emmet.setup{ capabilities = capabilities }
+```
+</script></section><section  data-markdown><script type="text/template">
+### [terrortylor/nvim-comment](http://github.com/terrortylor/nvim-comment)
+
+```lua
+use {"JoosepAlviste/nvim-ts-context-commentstring"}
+use {
+  "terrortylor/nvim-comment",
+  config = function()
+    require("nvim_comment").setup(
+      {
+        hook = function()
+          require("ts_context_commentstring.internal").update_commentstring()
+        end
+      }
+    )
+  end
+}
+```
+</script></section><section  data-markdown><script type="text/template">
+### [mhartington/formatter.nvim](https://github.com/mhartington/formatter.nvim)
+
+```lua
+use {"mhartington/formatter.nvim", config = function()
+  require("formatter").setup {
+    {
+      filetype = {
+        typescript = {
+          function()
+            return {
+              exe = "prettier",
+              args = { "--stdin-filepath", vim.api.nvim_buf_get_name(0) },
+              stdin = true
+            }
+          end
+        }
+      }
+    }
+  }
+end }
+```
+</script></section><section  data-markdown><script type="text/template">
+## Navigation
+</script></section><section  data-markdown><script type="text/template">
+<p> Possibly controversial </p>
+<p class="fragment fade-up"> I like file explorers...</p>
+<p class="fragment fade-up">But I also like fuzzy finders</p>
+</script></section><section  data-markdown><script type="text/template">
+### File explorer
+
+- New project
+- Unfamiliar setup
+- Better visualization
+</script></section><section  data-markdown><script type="text/template">
+### Fuzzy Finder
+
+- Familiar project
+- Consistent project setup
+- Better for abstract
+</script></section><section  data-markdown><script type="text/template">
+### [nvim-telescope/telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
+
+```lua
+  use {"nvim-telescope/telescope.nvim"}
+  use {"nvim-telescope/telescope-fzy-native.nvim"}
+
+  use {"nvim-telescope/telescope-packer.nvim"}
+  use {"nvim-telescope/telescope-node-modules.nvim"}
+```
+
+<small>Thanks TJ and crew</small>
+</script></section><section  data-markdown><script type="text/template">
+### [Xuyuanp/yanil](https://github.com/Xuyuanp/yanil)
+
+```lua
+  use {"Xuyuanp/yanil"}
+```
+
+"A lib to build your own NERDTree"
+</script></section><section  data-markdown><script type="text/template">
+## Deep code integration
+</script></section><section  data-markdown><script type="text/template">
+Beyond a file, but whole projects
+</script></section><section  data-markdown><script type="text/template">
+Yes, this includes LSP, but also more
+</script></section><section  data-markdown><script type="text/template">
+### Git integrations
+
+```lua
+-- Git UI
+use { "TimUntersberger/neogit" }
+
+-- GitHub UI
+-- Telescope Extension!
+use { "pwntester/octo.nvim",
+  config = function()
+    require "octo".setup()
+  end
+}
+```</script></section><section  data-markdown><script type="text/template">
+### Dependency Managment
+
+```lua
+use { "vuki656/package-info.nvim" }
+```
+</script></section><section  data-markdown><script type="text/template">
+### non-extensive list
+</script></section><section  data-markdown><script type="text/template">
+- TJ stream with Nick Nisi
+  - https://youtu.be/tAVxxdFFYMU
+- ThePrimeagen (~40mins in)
+  - https://www.twitch.tv/videos/1176587022
+- Elijah Manor
+  - https://elijahmanor.com/blog/neovim-tmux
+</script></section><section  data-markdown><script type="text/template">
+### how do you do frontend in vim?
+</script></section><section  data-markdown><script type="text/template">
+### Thank you
+## &lt;/html&gt;
+
+
+</script></section></div>
+    </div>
+
+    <script src="./dist/reveal.js"></script>
+
+    <script src="./plugin/markdown/markdown.js"></script>
+    <script src="./plugin/highlight/highlight.js"></script>
+    <script src="./plugin/zoom/zoom.js"></script>
+    <script src="./plugin/notes/notes.js"></script>
+    <script src="./plugin/math/math.js"></script>
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath
+        ]
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"controls":true,"progress":true,"transition":"fade","slideNumber":true}, queryOptions);
+    </script>
+
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+</html>
